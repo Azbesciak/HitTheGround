@@ -35,12 +35,8 @@ import static org.lwjgl.system.MemoryUtil.*;
 import static util.DemoUtils.ioResourceToByteBuffer;
 import static util.WavefrontMeshLoader.*;
 
-/**
- * A little 3D space shooter.
- *
- * @author Kai Burjack
- */
 public class SpaceGame {
+	//todo get all of this to trash.
 	private static class SpaceCamera {
 		public Vector3f linearAcc = new Vector3f();
 		public Vector3f linearVel = new Vector3f();
@@ -117,6 +113,11 @@ public class SpaceGame {
 	private int ship_projUniform;
 	private int ship_modelUniform;
 
+	private int cityProgram;
+	private int city_viewUniform;
+	private int city_projUniform;
+	private int city_modelUniform;
+
 	private int shotProgram;
 	private int shot_projUniform;
 
@@ -129,13 +130,17 @@ public class SpaceGame {
 	private int shipNormalVbo;
 	private Mesh sphere;
 	private Mesh asteroid;
+	private Mesh city;
 	private int asteroidPositionVbo;
+	private int cityPositionVbo;
+	private int cityNormalVbo;
 	private int asteroidNormalVbo;
 	private int shipCount = 128;
 	private int asteroidCount = 512;
 	private float maxAsteroidRadius = 20.0f;
 	private static float shipSpread = 1000.0f;
 	private static float shipRadius = 4.0f;
+	private static float cityRadius = 1f;
 	private Ship[] ships = new Ship[shipCount];
 	{
 		for (int i = 0; i < ships.length; i++) {
@@ -319,9 +324,11 @@ public class SpaceGame {
 		createFullScreenQuad();
 		createCubemapProgram();
 		createShipProgram();
+		createCityProgram();
 		createParticleProgram();
 		createShip();
 		createAsteroid();
+		createCity();
 		createShotProgram();
 		createSphere();
 
@@ -365,6 +372,19 @@ public class SpaceGame {
 		asteroidNormalVbo = glGenBuffers();
 		glBindBuffer(GL_ARRAY_BUFFER, asteroidNormalVbo);
 		glBufferData(GL_ARRAY_BUFFER, asteroid.normals, GL_STATIC_DRAW);
+		glBindBuffer(GL_ARRAY_BUFFER, 0);
+	}
+
+	private void createCity() throws IOException {
+		WavefrontMeshLoader loader = new WavefrontMeshLoader();
+		city = loader.loadMesh("game/city.obj.zip");
+		cityPositionVbo = glGenBuffers();
+		glBindBuffer(GL_ARRAY_BUFFER, cityPositionVbo);
+		glBufferData(GL_ARRAY_BUFFER, city.positions, GL_STATIC_DRAW);
+		glBindBuffer(GL_ARRAY_BUFFER, 0);
+		cityNormalVbo = glGenBuffers();
+		glBindBuffer(GL_ARRAY_BUFFER, cityNormalVbo);
+		glBufferData(GL_ARRAY_BUFFER, city.normals, GL_STATIC_DRAW);
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
 	}
 
@@ -433,6 +453,18 @@ public class SpaceGame {
 		shipProgram = program;
 	}
 
+	private void createCityProgram() throws IOException {
+		int vshader = createShader("game/city.vs", GL_VERTEX_SHADER);
+		int fshader = createShader("game/city.fs", GL_FRAGMENT_SHADER);
+		int program = createProgram(vshader, fshader);
+		glUseProgram(program);
+		city_viewUniform = glGetUniformLocation(program, "view");
+		city_projUniform = glGetUniformLocation(program, "proj");
+		city_modelUniform = glGetUniformLocation(program, "model");
+		glUseProgram(0);
+		cityProgram = program;
+	}
+
 	private void createParticleProgram() throws IOException {
 		int vshader = createShader("game/particle.vs", GL_VERTEX_SHADER);
 		int fshader = createShader("game/particle.fs", GL_FRAGMENT_SHADER);
@@ -466,7 +498,7 @@ public class SpaceGame {
 		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
 		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_GENERATE_MIPMAP, GL_TRUE);
 		for (int i = 0; i < 6; i++) {
-			imageBuffer = ioResourceToByteBuffer("space_" + names[i] + (i + 1) + ".jpg", 8 * 1024);
+			imageBuffer = ioResourceToByteBuffer("textures/" + names[i] + ".png", 8 * 1024);
 			if (!stbi_info_from_memory(imageBuffer, w, h, comp))
 				throw new IOException("Failed to read image information: " + stbi_failure_reason());
 			image = stbi_load_from_memory(imageBuffer, w, h, comp, 0);
@@ -474,6 +506,7 @@ public class SpaceGame {
 				throw new IOException("Failed to load image: " + stbi_failure_reason());
 			glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB8, w.get(0), h.get(0), 0, GL_RGB, GL_UNSIGNED_BYTE, image);
 			stbi_image_free(image);
+
 		}
 		if (caps.OpenGL32 || caps.GL_ARB_seamless_cube_map) {
 			glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
@@ -501,6 +534,10 @@ public class SpaceGame {
 		glUseProgram(shipProgram);
 		glUniformMatrix4fv(ship_viewUniform, false, viewMatrix.get(matrixBuffer));
 		glUniformMatrix4fv(ship_projUniform, false, projMatrix.get(matrixBuffer));
+
+		glUseProgram(cityProgram);
+		glUniformMatrix4fv(city_viewUniform, false, viewMatrix.get(matrixBuffer));
+		glUniformMatrix4fv(city_projUniform, false, projMatrix.get(matrixBuffer));
 
         /* Update the shot shader */
 		glUseProgram(shotProgram);
@@ -683,6 +720,27 @@ public class SpaceGame {
 		}
 		glDisableClientState(GL_NORMAL_ARRAY);
 	}
+
+	private void drawCity() {
+		glUseProgram(cityProgram);
+		glBindBuffer(GL_ARRAY_BUFFER, cityPositionVbo);
+		glVertexPointer(3, GL_FLOAT, 0, 0);
+		glEnableClientState(GL_NORMAL_ARRAY);
+		glBindBuffer(GL_ARRAY_BUFFER, cityNormalVbo);
+		glNormalPointer(GL_FLOAT, 0, 0);
+		glBindBuffer(GL_ARRAY_BUFFER, 0);
+			float x = (float) - cam.position.x;
+			float y = (float) (- cam.position.y - 300);
+			float z = (float) - cam.position.z;
+//			if (frustumIntersection.testSphere(x, y, z, cityRadius)) {
+				modelMatrix.translation(x, y, z);
+				modelMatrix.scale(cityRadius);
+				glUniformMatrix4fv(city_modelUniform, false, modelMatrix.get(matrixBuffer));
+				glDrawArrays(GL_TRIANGLES, 0, city.numVertices);
+//			}
+		glDisableClientState(GL_NORMAL_ARRAY);
+	}
+
 
 	private void drawParticles() {
 		particleVertices.clear();
@@ -1010,11 +1068,12 @@ public class SpaceGame {
 
 	private void render() {
 		glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
-		drawShips();
-		drawAsteroids();
+//		drawShips();
+		drawCity();
+//		drawAsteroids();
 		drawCubemap();
-		drawShots();
-		drawParticles();
+//		drawShots();
+//		drawParticles();
 		drawHudShotDirection();
 		drawHudShip();
 		drawVelocityCompass();
