@@ -59,7 +59,7 @@ public class Renderer {
         shadowRenderer.init(window);
         setupSkyBoxShader();
         setupSceneShader();
-        setupParticlesShader();
+//        setupParticlesShader();
     }
 
     public void render(Window window, Camera camera, Scene scene, boolean sceneChanged) {
@@ -83,7 +83,7 @@ public class Renderer {
 
         renderScene(window, camera, scene);
         renderSkyBox(window, camera, scene);
-        renderParticles(window, camera, scene);
+//        renderParticles(window, camera, scene);
 
         //renderAxes(camera);
         renderCrossHair(window);
@@ -105,8 +105,8 @@ public class Renderer {
 
     private void setupSkyBoxShader() throws Exception {
         skyBoxShaderProgram = new ShaderProgram();
-        skyBoxShaderProgram.createVertexShader(Utils.loadResource("/shaders/sb_vertex.vs"));
-        skyBoxShaderProgram.createFragmentShader(Utils.loadResource("/shaders/sb_fragment.fs"));
+        skyBoxShaderProgram.createVertexShader(Utils.loadResource("/shaders/sky_box.vs"));
+        skyBoxShaderProgram.createFragmentShader(Utils.loadResource("/shaders/sky_box.fs"));
         skyBoxShaderProgram.link();
 
         // Create uniforms for projection matrix
@@ -121,8 +121,8 @@ public class Renderer {
     private void setupSceneShader() throws Exception {
         // Create shader
         sceneShaderProgram = new ShaderProgram();
-        sceneShaderProgram.createVertexShader(Utils.loadResource("/shaders/scene_vertex.vs"));
-        sceneShaderProgram.createFragmentShader(Utils.loadResource("/shaders/scene_fragment.fs"));
+        sceneShaderProgram.createVertexShader(Utils.loadResource("/shaders/scene.vs"));
+        sceneShaderProgram.createFragmentShader(Utils.loadResource("/shaders/scene.fs"));
         sceneShaderProgram.link();
 
         // Create uniforms for view and projection matrices
