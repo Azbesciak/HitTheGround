@@ -42,7 +42,7 @@ public class PlaneGame implements IGameLogic {
 	public void init(Window window) throws Exception {
 		renderer.init(window);
 		scene = new Scene();
-		float skyBoxScale = 50.0f;
+		float skyBoxScale = 75.0f;
 
 		final Terrain terrain = prepareTerrain();
 		scene.setGameItems(terrain.getGameItems());
@@ -58,10 +58,10 @@ public class PlaneGame implements IGameLogic {
 	}
 
 	private Terrain prepareTerrain() throws Exception {
-		float terrainScale = 100;
-		int terrainSize = 3;
-		float minY = -0.1f;
-		float maxY = 0.1f;
+		float terrainScale = 75;
+		int terrainSize = 5;
+		float minY = 0f;
+		float maxY = 0.25f;
 		int textInc = 40;
 		return new Terrain(terrainSize, terrainScale, minY, maxY,
 						   "/textures/heightmap.png",
