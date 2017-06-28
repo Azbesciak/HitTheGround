@@ -5,6 +5,7 @@ import engine.graph.*;
 import engine.graph.lights.DirectionalLight;
 import engine.graph.weather.Fog;
 import engine.items.SkyBox;
+import engine.items.Terrain;
 import org.joml.Vector2f;
 import org.joml.Vector3f;
 import org.joml.Vector4f;
@@ -42,6 +43,9 @@ public class PlaneGame implements IGameLogic {
 		renderer.init(window);
 		scene = new Scene();
 		float skyBoxScale = 50.0f;
+
+		final Terrain terrain = prepareTerrain();
+		scene.setGameItems(terrain.getGameItems());
 		// Shadows
 		scene.setRenderShadows(true);
 		// Fog
@@ -51,6 +55,17 @@ public class PlaneGame implements IGameLogic {
 		// Setup Lights
 		setupLights();
 		setupCamera();
+	}
+
+	private Terrain prepareTerrain() throws Exception {
+		float terrainScale = 100;
+		int terrainSize = 3;
+		float minY = -0.1f;
+		float maxY = 0.1f;
+		int textInc = 40;
+		return new Terrain(terrainSize, terrainScale, minY, maxY,
+						   "/textures/heightmap.png",
+						   "/textures/terrain.png", textInc);
 	}
 
 	private Fog createFog() {
@@ -65,11 +80,11 @@ public class PlaneGame implements IGameLogic {
 	}
 
 	private void setupCamera() {
-		camera.getPosition().x = 0.25f;
-		camera.getPosition().y = 6.5f;
-		camera.getPosition().z = 6.5f;
-		camera.getRotation().x = 25;
-		camera.getRotation().y = -1;
+		camera.getPosition().x = 0;
+		camera.getPosition().y = 0;
+		camera.getPosition().z = 0;
+		camera.getRotation().x = 0;
+		camera.getRotation().y = 0;
 	}
 
 	private void setupLights() {

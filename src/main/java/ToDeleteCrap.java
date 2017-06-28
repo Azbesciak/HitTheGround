@@ -35,7 +35,7 @@ import static org.lwjgl.system.MemoryUtil.*;
 import static util.DemoUtils.ioResourceToByteBuffer;
 import static util.WavefrontMeshLoader.*;
 
-public class SpaceGame {
+public class ToDeleteCrap {
 	//todo get all of this to trash.
 	private static class SpaceCamera {
 		public Vector3f linearAcc = new Vector3f();
@@ -247,17 +247,17 @@ public class SpaceGame {
 
 		glfwSetFramebufferSizeCallback(window, fbCallback = new GLFWFramebufferSizeCallback() {
 			public void invoke(long window, int width, int height) {
-				if (width > 0 && height > 0 && (SpaceGame.this.fbWidth != width || SpaceGame.this.fbHeight != height)) {
-					SpaceGame.this.fbWidth = width;
-					SpaceGame.this.fbHeight = height;
+				if (width > 0 && height > 0 && (ToDeleteCrap.this.fbWidth != width || ToDeleteCrap.this.fbHeight != height)) {
+					ToDeleteCrap.this.fbWidth = width;
+					ToDeleteCrap.this.fbHeight = height;
 				}
 			}
 		});
 		glfwSetWindowSizeCallback(window, wsCallback = new GLFWWindowSizeCallback() {
 			public void invoke(long window, int width, int height) {
-				if (width > 0 && height > 0 && (SpaceGame.this.width != width || SpaceGame.this.height != height)) {
-					SpaceGame.this.width = width;
-					SpaceGame.this.height = height;
+				if (width > 0 && height > 0 && (ToDeleteCrap.this.width != width || ToDeleteCrap.this.height != height)) {
+					ToDeleteCrap.this.width = width;
+					ToDeleteCrap.this.height = height;
 				}
 			}
 		});
@@ -286,8 +286,8 @@ public class SpaceGame {
 			public void invoke(long window, double xpos, double ypos) {
 				float normX = (float) ((xpos - width/2.0) / width * 2.0);
 				float normY = (float) ((ypos - height/2.0) / height * 2.0);
-				SpaceGame.this.mouseX = Math.max(-width/2.0f, Math.min(width/2.0f, normX));
-				SpaceGame.this.mouseY = Math.max(-height/2.0f, Math.min(height/2.0f, normY));
+				ToDeleteCrap.this.mouseX = Math.max(-width/2.0f, Math.min(width/2.0f, normX));
+				ToDeleteCrap.this.mouseY = Math.max(-height/2.0f, Math.min(height/2.0f, normY));
 			}
 		});
 		glfwSetMouseButtonCallback(window, mbCallback = new GLFWMouseButtonCallback() {
@@ -1111,7 +1111,7 @@ public class SpaceGame {
 	}
 
 	public static void main(String[] args) {
-		new SpaceGame().run();
+		new ToDeleteCrap().run();
 	}
 
 }
