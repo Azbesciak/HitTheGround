@@ -1,5 +1,6 @@
 package engine.graph;
 
+import engine.items.Terrain;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
 
@@ -40,7 +41,7 @@ public class Camera {
         return Transformation.updateGenericViewMatrix(position, rotation, viewMatrix);
     }
     
-    public void movePosition(float offsetX, float offsetY, float offsetZ) {
+    public void movePosition(float offsetX, float offsetY, float offsetZ, Terrain terrain) {
         if ( offsetZ != 0 ) {
             position.x += (float)Math.sin(Math.toRadians(rotation.y)) * -1.0f * offsetZ;
             position.z += (float)Math.cos(Math.toRadians(rotation.y)) * offsetZ;
@@ -49,7 +50,11 @@ public class Camera {
             position.x += (float)Math.sin(Math.toRadians(rotation.y - 90)) * -1.0f * offsetX;
             position.z += (float)Math.cos(Math.toRadians(rotation.y - 90)) * offsetX;
         }
-        position.y += offsetY;
+//        position.y += offsetY;
+        final float height = terrain.getHeight(position) + 2;
+//        if (position.y < height) {
+            position.y = height;
+//        }
     }
 
     public Vector3f getRotation() {

@@ -8,7 +8,6 @@ import engine.items.SkyBox;
 import engine.items.Terrain;
 import org.joml.Vector2f;
 import org.joml.Vector3f;
-import org.joml.Vector4f;
 
 import static org.lwjgl.glfw.GLFW.*;
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_RIGHT;
@@ -44,8 +43,7 @@ public class PlaneGame implements IGameLogic {
 		scene = new Scene();
 		float skyBoxScale = 75.0f;
 
-		final Terrain terrain = prepareTerrain();
-		scene.setGameItems(terrain.getGameItems());
+		scene.setTerrain(prepareTerrain());
 		// Shadows
 		scene.setRenderShadows(true);
 		// Fog
@@ -163,7 +161,8 @@ public class PlaneGame implements IGameLogic {
 	private void moveCamera() {
 		camera.movePosition(cameraInc.x * CAMERA_POS_STEP,
 							cameraInc.y * CAMERA_POS_STEP,
-							cameraInc.z * CAMERA_POS_STEP);
+							cameraInc.z * CAMERA_POS_STEP,
+							scene.getTerrain());
 	}
 
 	private void updateLight() {

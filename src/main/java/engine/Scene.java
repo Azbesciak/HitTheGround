@@ -6,6 +6,8 @@ import engine.graph.particles.IParticleEmitter;
 import engine.graph.weather.Fog;
 import engine.items.GameItem;
 import engine.items.SkyBox;
+import engine.items.Terrain;
+import org.joml.Vector3f;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -24,13 +26,15 @@ public class Scene {
 
     private Fog fog;
 
+    private Terrain terrain;
+
     private boolean renderShadows;
     
     private IParticleEmitter[] particleEmitters;
 
     public Scene() {
-        meshMap = new HashMap();
-        instancedMeshMap = new HashMap();
+        meshMap = new HashMap<>();
+        instancedMeshMap = new HashMap<>();
         fog = Fog.NOFOG;
         renderShadows = true;
     }
@@ -41,6 +45,15 @@ public class Scene {
 
     public Map<InstancedMesh, List<GameItem>> getGameInstancedMeshes() {
         return instancedMeshMap;
+    }
+
+    public void setTerrain(Terrain terrain) {
+        this.terrain = terrain;
+        setGameItems(terrain.getGameItems());
+    }
+
+    public float getTerrainHeight(Vector3f position) {
+        return terrain.getHeight(position);
     }
 
     public boolean isRenderShadows() {
@@ -125,4 +138,7 @@ public class Scene {
         this.particleEmitters = particleEmitters;
     }
 
+    public Terrain getTerrain() {
+        return terrain;
+    }
 }
