@@ -44,15 +44,18 @@ public class PlaneGame implements IGameLogic {
 		float skyBoxScale = 75.0f;
 
 		scene.setTerrain(prepareTerrain());
-		// Shadows
+		scene.setPlane(createPlane());
 		scene.setRenderShadows(true);
-		// Fog
 		scene.setFog(createFog());
-		// Setup  SkyBox
 		scene.setSkyBox(createSkyBox(skyBoxScale));
-		// Setup Lights
 		setupLights();
 		setupCamera();
+	}
+
+	private Plane createPlane() throws Exception {
+		return new Plane("/models/FA-22_Raptor.obj",
+						 "/textures/FA-22_Raptor_P01.png",
+						 "/textures/FA-22_Raptor_N.png");
 	}
 
 	private Terrain prepareTerrain() throws Exception {
@@ -78,11 +81,8 @@ public class PlaneGame implements IGameLogic {
 	}
 
 	private void setupCamera() {
-		camera.getPosition().x = 0;
-		camera.getPosition().y = 0;
-		camera.getPosition().z = 0;
-		camera.getRotation().x = 0;
-		camera.getRotation().y = 0;
+		camera.setPosition(0,0,0);
+		camera.setRotation(0,0,0);
 	}
 
 	private void setupLights() {
@@ -177,11 +177,8 @@ public class PlaneGame implements IGameLogic {
 		}
 		float zValue = (float) Math.cos(Math.toRadians(lightAngle));
 		float yValue = (float) Math.sin(Math.toRadians(lightAngle));
-		Vector3f lightDirection = scene.getSceneLight().getDirectionalLight().getDirection();
-		lightDirection.x = 0;
-		lightDirection.y = yValue;
-		lightDirection.z = zValue;
-		lightDirection.normalize();
+		scene.getSceneLight().getDirectionalLight()
+				.setDirection(new Vector3f(0, yValue, zValue).normalize());
 	}
 
 	@Override

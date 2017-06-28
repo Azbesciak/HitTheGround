@@ -7,7 +7,6 @@ import engine.graph.weather.Fog;
 import engine.items.GameItem;
 import engine.items.SkyBox;
 import engine.items.Terrain;
-import org.joml.Vector3f;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -32,6 +31,8 @@ public class Scene {
     
     private IParticleEmitter[] particleEmitters;
 
+    private Plane plane;
+
     public Scene() {
         meshMap = new HashMap<>();
         instancedMeshMap = new HashMap<>();
@@ -50,10 +51,6 @@ public class Scene {
     public void setTerrain(Terrain terrain) {
         this.terrain = terrain;
         setGameItems(terrain.getGameItems());
-    }
-
-    public float getTerrainHeight(Vector3f position) {
-        return terrain.getHeight(position);
     }
 
     public boolean isRenderShadows() {
@@ -140,5 +137,13 @@ public class Scene {
 
     public Terrain getTerrain() {
         return terrain;
+    }
+
+    public Plane getPlane() {
+        return plane;
+    }
+
+    public void setPlane(Plane plane) {
+        this.plane = plane;
     }
 }

@@ -1,5 +1,8 @@
 package engine.items;
 
+import engine.graph.Material;
+import engine.graph.Texture;
+import engine.loaders.obj.OBJLoader;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
 import engine.graph.Mesh;
@@ -21,6 +24,24 @@ public class GameItem {
     private boolean disableFrustumCulling;
 
     private boolean insideFrustum;
+
+    public GameItem(String objModel, String textureFile) throws Exception {
+       this(objModel, textureFile, null);
+    }
+
+    public GameItem(String objModel, String textureFile, String normalFile) throws Exception {
+        this();
+        Mesh mesh = OBJLoader.loadMesh(objModel);
+        Texture texture = new Texture(textureFile);
+        final Material material = new Material(texture, 0.0f);
+        if (normalFile != null) {
+            final Texture normal = new Texture(normalFile);
+            material.setNormalMap(normal);
+        }
+        mesh.setMaterial(material);
+        setMesh(mesh);
+        setPosition(0, 0, 0);
+    }
 
     public GameItem() {
         selected = false;
