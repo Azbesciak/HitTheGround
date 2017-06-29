@@ -50,14 +50,14 @@ public class Scene {
 
     public void setTerrain(Terrain terrain) {
         this.terrain = terrain;
-        setGameItems(terrain.getGameItems());
+        addGameItems(terrain.getGameItems());
     }
 
     public boolean isRenderShadows() {
         return renderShadows;
     }
 
-    public void setGameItems(GameItem[] gameItems) {
+    public void addGameItems(GameItem[] gameItems) {
         // Create a map of meshes to speed up rendering
         int numGameItems = gameItems != null ? gameItems.length : 0;
         for (int i = 0; i < numGameItems; i++) {
@@ -145,5 +145,6 @@ public class Scene {
 
     public void setPlane(Plane plane) {
         this.plane = plane;
+        addGameItems(new Plane[] {plane});
     }
 }

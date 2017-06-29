@@ -13,11 +13,11 @@ public class GameItem {
 
     private Mesh[] meshes;
 
-    private final Vector3f position;
+    protected final Vector3f position;
 
-    private float scale;
+    protected float scale;
 
-    private final Quaternionf rotation;
+    protected final Quaternionf rotation;
 
     private int textPos;
     

@@ -1,6 +1,6 @@
 package engine.graph;
 
-import engine.items.Terrain;
+import engine.Plane;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
 
@@ -40,22 +40,29 @@ public class Camera {
     public Matrix4f updateViewMatrix() {
         return Transformation.updateGenericViewMatrix(position, rotation, viewMatrix);
     }
-    
-    public void movePosition(float offsetX, float offsetY, float offsetZ, Terrain terrain) {
-        if ( offsetZ != 0 ) {
-            position.x += (float)Math.sin(Math.toRadians(rotation.y)) * -1.0f * offsetZ;
-            position.z += (float)Math.cos(Math.toRadians(rotation.y)) * offsetZ;
-        }
-        if ( offsetX != 0) {
-            position.x += (float)Math.sin(Math.toRadians(rotation.y - 90)) * -1.0f * offsetX;
-            position.z += (float)Math.cos(Math.toRadians(rotation.y - 90)) * offsetX;
-        }
-//        position.y += offsetY;
-        final float height = terrain.getHeight(position) + 2;
-//        if (position.y < height) {
-            position.y = height;
-//        }
+
+    public void followPlane(Plane plane, Vector3f distance) {
+        final Vector3f planePosition = plane.getPosition();
+        position.x = planePosition.x + distance.x;
+        position.y = planePosition.y + distance.y;
+        position.z = planePosition.z + distance.z;
     }
+
+//    public void updatePosition(float offsetX, float offsetY, float offsetZ, Terrain terrain) {
+//        if ( offsetZ != 0 ) {
+//            position.x += (float)Math.sin(Math.toRadians(rotation.y)) * -1.0f * offsetZ;
+//            position.z += (float)Math.cos(Math.toRadians(rotation.y)) * offsetZ;
+//        }
+//        if ( offsetX != 0) {
+//            position.x += (float)Math.sin(Math.toRadians(rotation.y - 90)) * -1.0f * offsetX;
+//            position.z += (float)Math.cos(Math.toRadians(rotation.y - 90)) * offsetX;
+//        }
+//        position.y += offsetY;
+//        final float height = terrain.getHeight(position) + 2;
+//        if (position.y < height) {
+//            position.y = height;
+//        }
+//    }
 
     public Vector3f getRotation() {
         return rotation;

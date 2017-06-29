@@ -9,9 +9,6 @@ import engine.items.Terrain;
 import org.joml.Vector2f;
 import org.joml.Vector3f;
 
-import static org.lwjgl.glfw.GLFW.*;
-import static org.lwjgl.glfw.GLFW.GLFW_KEY_RIGHT;
-
 public class PlaneGame implements IGameLogic {
 
 	private static final float MOUSE_SENSITIVITY = 0.2f;
@@ -82,7 +79,7 @@ public class PlaneGame implements IGameLogic {
 
 	private void setupCamera() {
 		camera.setPosition(0,0,0);
-		camera.setRotation(0,0,0);
+		camera.setRotation(0,0,(float) Math.toRadians(20));
 	}
 
 	private void setupLights() {
@@ -102,37 +99,8 @@ public class PlaneGame implements IGameLogic {
 
 	@Override
 	public void input(Window window, MouseInput mouseInput) {
-		sceneChanged = false;
-		cameraInc.set(0, 0, 0);
-		if (window.isKeyPressed(GLFW_KEY_W)) {
+		if (scene.getPlane().onInput(window)) {
 			sceneChanged = true;
-			cameraInc.z = -1;
-		} else if (window.isKeyPressed(GLFW_KEY_S)) {
-			sceneChanged = true;
-			cameraInc.z = 1;
-		}
-		if (window.isKeyPressed(GLFW_KEY_A)) {
-			sceneChanged = true;
-			cameraInc.x = -1;
-		} else if (window.isKeyPressed(GLFW_KEY_D)) {
-			sceneChanged = true;
-			cameraInc.x = 1;
-		}
-		if (window.isKeyPressed(GLFW_KEY_Z)) {
-			sceneChanged = true;
-			cameraInc.y = -1;
-		} else if (window.isKeyPressed(GLFW_KEY_X)) {
-			sceneChanged = true;
-			cameraInc.y = 1;
-		}
-		if (window.isKeyPressed(GLFW_KEY_LEFT)) {
-			sceneChanged = true;
-			angleInc -= 0.05f;
-		} else if (window.isKeyPressed(GLFW_KEY_RIGHT)) {
-			sceneChanged = true;
-			angleInc += 0.05f;
-		} else {
-			angleInc = 0;
 		}
 	}
 
@@ -140,6 +108,7 @@ public class PlaneGame implements IGameLogic {
 	public void update(float interval, MouseInput mouseInput, Window window) {
 		rotateCamera(mouseInput);
 		// Update camera position
+		scene.getPlane().update(scene.getTerrain(), CAMERA_POS_STEP);
 		moveCamera();
 		updateLight();
 
@@ -159,10 +128,7 @@ public class PlaneGame implements IGameLogic {
 	}
 
 	private void moveCamera() {
-		camera.movePosition(cameraInc.x * CAMERA_POS_STEP,
-							cameraInc.y * CAMERA_POS_STEP,
-							cameraInc.z * CAMERA_POS_STEP,
-							scene.getTerrain());
+		camera.followPlane(scene.getPlane(), new Vector3f(0,0.5f,2f));
 	}
 
 	private void updateLight() {
