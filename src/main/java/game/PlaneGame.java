@@ -21,7 +21,7 @@ public class PlaneGame implements IGameLogic {
 	private float angleInc;
 	private float lightAngle;
 	private boolean firstTime;
-
+	private static final float skyBoxScale = 200.0f;
 	private boolean sceneChanged;
 
 	PlaneGame() {
@@ -36,7 +36,6 @@ public class PlaneGame implements IGameLogic {
 	public void init(Window window) throws Exception {
 		renderer.init(window);
 		scene = new Scene();
-		float skyBoxScale = 200.0f;
 
 		scene.setTerrain(prepareTerrain());
 		scene.setPlane(createPlane());
@@ -54,7 +53,7 @@ public class PlaneGame implements IGameLogic {
 	}
 
 	private Terrain prepareTerrain() throws Exception {
-		float terrainScale = 150;
+		float terrainScale = skyBoxScale * 0.8f;
 		int terrainSize = 5;
 		float minY = 0f;
 		float maxY = 0.25f;
@@ -66,7 +65,7 @@ public class PlaneGame implements IGameLogic {
 
 	private Fog createFog() {
 		Vector3f fogColour = new Vector3f(0.5f, 0.5f, 0.5f);
-		return new Fog(true, fogColour, 0.01f);
+		return new Fog(true, fogColour, 0.0075f);
 	}
 
 	private SkyBox createSkyBox(float skyBoxScale) throws Exception {
@@ -107,7 +106,7 @@ public class PlaneGame implements IGameLogic {
 		rotateCamera(mouseInput);
 		// Update camera position
 		scene.getPlane().update(scene.getTerrain(), CAMERA_POS_STEP);
-		moveCamera();
+		moveCamera(scene.getPlane().getCameraDistance());
 		updateLight();
 
 		// Update view matrix
@@ -125,8 +124,8 @@ public class PlaneGame implements IGameLogic {
 		}
 	}
 
-	private void moveCamera() {
-		camera.followPlane(scene.getPlane(), 2);
+	private void moveCamera(float distance) {
+		camera.followPlane(scene.getPlane(), distance);
 	}
 
 	private void updateLight() {

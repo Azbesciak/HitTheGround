@@ -15,8 +15,11 @@ public class Plane extends GameItem {
 	private static final double RESISTANCE = 0.0001;
 	private static final double GRAVITY = 0.01;
 	private static final int NEGATIVE_RIGHT_ANGLE = -90;
-	public static final int CRASH_LIMIT_ANGLE = -30;
-	public static final float TILT_ANGLE_DIFFERENCE = 0.05f;
+	private static final int CRASH_LIMIT_ANGLE = -30;
+	private static final float TILT_ANGLE_DIFFERENCE = 0.05f;
+	private static final float ADDITIONAL_DISTANCE = 0.4f;
+	private static final float BASIC_DISTANCE = 2;
+
 
 	private double speedDirectionAngle = NEGATIVE_RIGHT_ANGLE;
 	private Vector3f positionOffset;
@@ -82,22 +85,23 @@ public class Plane extends GameItem {
 	}
 
 	public void update(Terrain terrain, float sensitivity) {
-		updatePosition(terrain, sensitivity);
 		updateRotation(terrain, sensitivity);
+		updatePosition(terrain, sensitivity);
 	}
 
 	private void updatePosition(Terrain terrain, float sensitivity) {
 		positionOffset.mul(sensitivity);
-		position.add(positionOffset.rotate(Utils.deepCopy(rotation).rotateX(90)));
+		final Quaternionf planeRealRotation = Utils.deepCopy(rotation).rotateX(90);
+		position.add(positionOffset.rotate(planeRealRotation));
 		final float height = terrain.getHeight(position) + 2;
 		position.y += GRAVITY * difference * Math.sin(Math.toRadians(speedDirectionAngle));
 		if (position.y <= height) {
 			isInAir = false;
 			if (speedDirectionAngle > CRASH_LIMIT_ANGLE) {
 				speedDirectionAngle = NEGATIVE_RIGHT_ANGLE;
-				rotation.set(new Quaternionf());
-				stabilizePlaneModel();
 			}
+			rotation.set(new Quaternionf());
+			stabilizePlaneModel();
 			position.y = height;
 		} else {
 			isInAir = true;
@@ -118,4 +122,8 @@ public class Plane extends GameItem {
 		rotation.rotateX((float) Math.toRadians(-90));
 	}
 
+	public float getCameraDistance() {
+		return BASIC_DISTANCE + ADDITIONAL_DISTANCE *
+				(float)Math.cos(Math.toRadians(speedDirectionAngle));
+	}
 }
