@@ -14,11 +14,13 @@ public class Plane extends GameItem {
 	private final float MAX_SPEED = 1;
 	private Vector3f positionOffset;
 	private Vector3f rotationOffset;
+	private Vector3f positionDegrees;
 
 	public Plane(String objModel, String textureFile, String normalFile) throws Exception {
 		super(objModel, textureFile, normalFile);
 		positionOffset = new Vector3f();
 		rotationOffset = new Vector3f();
+		positionDegrees = new Vector3f();
 		scale = 0.1f;
 		getRotation().rotateX((float)Math.toRadians(-90));
 	}
@@ -81,7 +83,8 @@ public class Plane extends GameItem {
 
 	private void updatePosition(Terrain terrain, float sensitivity) {
 		positionOffset.mul(sensitivity);
-		Utils.updatePosition(rotation, position, positionOffset);
+		position.add(positionOffset.rotate(Utils.deepCopy(rotation).rotateX(90)));
+//		position.set(Utils.updatePosition(rotation, position, positionOffset));
 		final float height = terrain.getHeight(position) + 2;
 		if (position.y < height) {
 			position.y = height;

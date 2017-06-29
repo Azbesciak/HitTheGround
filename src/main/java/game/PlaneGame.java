@@ -15,7 +15,6 @@ public class PlaneGame implements IGameLogic {
 	private static final float CAMERA_POS_STEP = 0.10f;
 	private static final int STRAIGHT_ANGLE = 180;
 
-	private final Vector3f cameraInc;
 	private final Renderer renderer;
 	private final Camera camera;
 	private Scene scene;
@@ -28,7 +27,6 @@ public class PlaneGame implements IGameLogic {
 	PlaneGame() {
 		renderer = new Renderer();
 		camera = new Camera();
-		cameraInc = new Vector3f(0.0f, 0.0f, 0.0f);
 		angleInc = 0;
 		lightAngle = 90;
 		firstTime = true;

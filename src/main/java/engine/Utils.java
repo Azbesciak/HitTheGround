@@ -111,16 +111,17 @@ public class Utils {
     }
 
     public static Vector3f updatePosition(Quaternionf rotation, Vector3f currentPosition, Vector3f positionOffset) {
+        final Vector3f position = deepCopy(currentPosition);
         if (positionOffset.z != 0 ) {
-            currentPosition.x -= (float)Math.sin(Math.toRadians(rotation.y)) * positionOffset.z;
-            currentPosition.z += (float)Math.cos(Math.toRadians(rotation.y)) * positionOffset.z;
+            position.x -= (float)Math.sin(Math.toRadians(rotation.y)) * positionOffset.z;
+            position.z += (float)Math.cos(Math.toRadians(rotation.y)) * positionOffset.z;
         }
         if (positionOffset.x != 0) {
-            currentPosition.x -= (float)Math.sin(Math.toRadians(rotation.y - 90)) * positionOffset.x;
-            currentPosition.z += (float)Math.cos(Math.toRadians(rotation.y - 90)) * positionOffset.x;
+            position.x -= (float)Math.sin(Math.toRadians(rotation.y - 90)) * positionOffset.x;
+            position.z += (float)Math.cos(Math.toRadians(rotation.y - 90)) * positionOffset.x;
         }
-        currentPosition.y += positionOffset.y;
-        return currentPosition;
+        position.y += positionOffset.y;
+        return position;
     }
 
     public static <E> E deepCopy(E original) {

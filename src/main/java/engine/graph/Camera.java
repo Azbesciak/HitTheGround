@@ -51,13 +51,19 @@ public class Camera {
                 Utils.deepCopy(plane.getRotation())
                         .rotateX(90)
                         .getEulerAnglesXYZ(new Vector3f());
-        rotation.x = -(float)Math.toDegrees(planeRotation.x) + 20;
+        rotation.x = -(float)Math.toDegrees(planeRotation.x) + 25;
         rotation.y = -(float)Math.toDegrees(planeRotation.y);
-        rotation.z = -(float)Math.toDegrees(planeRotation.z);
+        rotation.z = -(float)Math.toDegrees(planeRotation.z) +50;
 
-        position.x = planePosition.x;// - (float)Math.sin(planeRotation.y) * 0.2f;
-        position.y = planePosition.y - (float)Math.sin(planeRotation.x) * 2;
-        position.z = planePosition.z + (float)Math.cos(planeRotation.x) * 2;
+
+        position.set(new Vector3f(0,
+                                  (float)Math.sin(Math.toRadians(30)) * distance,
+                                  (float)Math.cos(Math.toRadians(30)) * distance)
+                .rotate(Utils.deepCopy(plane.getRotation())
+                                .rotateX(90)).add(planePosition));
+//        position.x = planePosition.x;// - (float)Math.sin(planeRotation.y) * 0.2f;
+//        position.y = planePosition.y - (float)(Math.sin(Math.toRadians(rotation.x)) * 2);
+//        position.z = planePosition.z + (float)(Math.cos(Math.toRadians(rotation.x)) * 2);
     }
 
     public Vector3f getRotation() {
