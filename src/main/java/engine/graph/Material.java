@@ -4,7 +4,7 @@ import org.joml.Vector4f;
 
 public class Material {
 
-    private static final Vector4f DEFAULT_COLOUR = new Vector4f(1.0f, 1.0f, 1.0f, 1.0f);
+    public static final Vector4f DEFAULT_COLOUR = new Vector4f(1.0f, 1.0f, 1.0f, 1.0f);
 
     private Vector4f ambientColour;
 
@@ -24,6 +24,10 @@ public class Material {
         this.specularColour = DEFAULT_COLOUR;
         this.texture = null;
         this.reflectance = 0;
+    }
+
+    public Material(Vector4f ambientColour, Vector4f diffuseColour, Vector4f specularColour, float reflectance) {
+        this(ambientColour, diffuseColour, specularColour, null, reflectance);
     }
 
     public Material(Vector4f colour, float reflectance) {

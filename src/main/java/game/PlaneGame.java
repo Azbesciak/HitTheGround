@@ -7,6 +7,7 @@ import engine.Scene;
 import engine.SceneLight;
 import engine.Window;
 import engine.graph.Camera;
+import engine.graph.Mesh;
 import engine.graph.Renderer;
 import engine.graph.lights.DirectionalLight;
 import engine.graph.weather.Fog;
@@ -15,8 +16,11 @@ import engine.items.CityBuildings;
 import engine.items.GameItem;
 import engine.items.SkyBox;
 import engine.items.Terrain;
+import engine.loaders.assimp.StaticMeshesLoader;
 import org.joml.Vector2f;
 import org.joml.Vector3f;
+
+import java.io.File;
 
 public class PlaneGame implements IGameLogic {
 
@@ -30,7 +34,7 @@ public class PlaneGame implements IGameLogic {
 	private float angleInc;
 	private float lightAngle;
 	private boolean firstTime;
-	private static final float skyBoxScale = 200.0f;
+	private static final float skyBoxScale = 500.0f;
 	private boolean sceneChanged;
 
 	PlaneGame() {
@@ -47,7 +51,7 @@ public class PlaneGame implements IGameLogic {
 		scene = new Scene();
 
 		scene.setTerrain(prepareTerrain());
-		scene.addGameItems(prepareCity().getGameItems());
+//		scene.addGameItems(prepareCity().getGameItems());
         scene.addGameItems(prepareCityBuildings().getGameItems());
 		scene.setPlane(createPlane());
 		scene.setRenderShadows(true);
@@ -64,31 +68,25 @@ public class PlaneGame implements IGameLogic {
 	}
 
 	private Terrain prepareTerrain() throws Exception {
-		float terrainScale = skyBoxScale * 0.8f;
+		float terrainScale = skyBoxScale;
 		int terrainSize = 5;
 		float minY = 0f;
 		float maxY = 0.25f;
 		int textInc = 40;
 		return new Terrain(terrainSize, terrainScale, minY, maxY,
 						   "/textures/heightmap.png",
-						   "/textures/terrain.png", textInc);
+						   "/textures/terrain.png", textInc,
+						   "/textures/heightmap_city.png");
 	}
 
     private CityBuildings prepareCityBuildings() throws Exception {
         CityBuildings cityBuildings= new CityBuildings("/models/city2/The_city.obj");
-        GameItem[] gm = cityBuildings.getGameItems();
-
-        for (GameItem gameItem : cityBuildings.getGameItems()) {
-            gameItem.setScale(75);
-            gameItem.setDisableFrustumCulling(true);
-            gameItem.setInsideFrustum(false);
-        }
         return cityBuildings;
     }
 
 	private City prepareCity() throws Exception {
-		float terrainScale = skyBoxScale * 0.8f;
-		int terrainSize = 5;
+		float terrainScale = 0.00008f;
+		int terrainSize = 1;
 		float minY = 0f;
 		float maxY = 0.25f;
 		int textInc = 40;
@@ -140,8 +138,6 @@ public class PlaneGame implements IGameLogic {
 	@Override
 	public void update(float interval, MouseInput mouseInput, Window window) {
 		rotateCamera(mouseInput);
-//		Quaternionf rotation = scene.getPlane().getRotation();
-//		camera.setRotation(rotation.x,rotation.y,rotation.z);
 		// Update camera position
 		scene.getPlane().update(scene.getTerrain(), CAMERA_POS_STEP);
 		moveCamera(scene.getPlane().getCameraDistance());

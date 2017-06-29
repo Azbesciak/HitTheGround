@@ -4,6 +4,7 @@ import de.matthiasmann.twl.utils.PNGDecoder;
 import org.joml.Vector3f;
 import engine.graph.HeightMapMesh;
 
+import java.io.IOException;
 import java.nio.ByteBuffer;
 
 public class Terrain {
@@ -16,12 +17,15 @@ public class Terrain {
 
     private final int verticesPerRow;
 
-    private final HeightMapMesh heightMapMesh;
-
     /**
      * It will hold the bounding box for each terrain block
      */
     private final Box2D[][] boundingBoxes;
+    public Terrain(int terrainSize, float scale, float minY, float maxY, String heightMapFile, String textureFile,
+                   int textInc) throws Exception {
+        this(terrainSize, scale, minY, maxY, heightMapFile, textureFile, textInc, null);
+    }
+
 
     /**
      * A Terrain is composed by blocks, each block is a GameItem constructed
@@ -36,37 +40,63 @@ public class Terrain {
      * @param textInc
      * @throws Exception
      */
-    public Terrain(int terrainSize, float scale, float minY, float maxY, String heightMapFile, String textureFile, int textInc) throws Exception {
+    public Terrain(int terrainSize, float scale, float minY, float maxY, String heightMapFile, String textureFile,
+                   int textInc, String cityHeightFile) throws Exception {
         this.terrainSize = terrainSize;
         gameItems = new GameItem[terrainSize * terrainSize];
+        final PNGData terrainHeightMap = decodePng(heightMapFile);
 
-        PNGDecoder decoder = new PNGDecoder(getClass().getResourceAsStream(heightMapFile));
-        int height = decoder.getHeight();
-        int width = decoder.getWidth();
-        ByteBuffer buf = ByteBuffer.allocateDirect(
-                4 * decoder.getWidth() * decoder.getHeight());
-        decoder.decode(buf, decoder.getWidth() * 4, PNGDecoder.Format.RGBA);
-        buf.flip();
 
         // The number of vertices per column and row
-        verticesPerCol = width - 1;
-        verticesPerRow = height - 1;
+        verticesPerCol = terrainHeightMap.width - 1;
+        verticesPerRow = terrainHeightMap.height - 1;
 
-        heightMapMesh = new HeightMapMesh(minY, maxY, buf, width, height, textureFile, textInc);
+        HeightMapMesh heightMapMesh = new HeightMapMesh(minY, maxY, terrainHeightMap.buf, terrainHeightMap.width,
+                                          terrainHeightMap.height, textureFile, textInc);
+        HeightMapMesh cityHeightMapMesh;
+        if (cityHeightFile != null) {
+            final PNGData cityHeightMap = decodePng(cityHeightFile);
+            cityHeightMapMesh = new HeightMapMesh(minY, maxY, cityHeightMap.buf, cityHeightMap.width,
+                                                  cityHeightMap.height, textureFile, textInc);
+        } else {
+            cityHeightMapMesh = null;
+        }
+
         boundingBoxes = new Box2D[terrainSize][terrainSize];
         for (int row = 0; row < terrainSize; row++) {
             for (int col = 0; col < terrainSize; col++) {
                 float xDisplacement = (col - ((float) terrainSize - 1) / (float) 2) * scale * HeightMapMesh.getXLength();
                 float zDisplacement = (row - ((float) terrainSize - 1) / (float) 2) * scale * HeightMapMesh.getZLength();
 
-                GameItem terrainBlock = new GameItem(heightMapMesh.getMesh());
+                GameItem terrainBlock;
+                if (col == terrainSize / 2 && row == terrainSize / 2 && cityHeightMapMesh != null) {
+                    terrainBlock = new GameItem(cityHeightMapMesh.getMesh());
+                } else {
+                    terrainBlock = new GameItem(heightMapMesh.getMesh());
+                }
+
                 terrainBlock.setScale(scale);
                 terrainBlock.setPosition(xDisplacement, 0, zDisplacement);
                 gameItems[row * terrainSize + col] = terrainBlock;
 
-                boundingBoxes[row][col] = getBoundingBox(terrainBlock);
+                if (col == terrainSize / 2 && row == terrainSize / 2 && cityHeightMapMesh != null) {
+                    boundingBoxes[row][col] = getBoundingBox(terrainBlock, cityHeightMapMesh);
+                } else {
+                    boundingBoxes[row][col] = getBoundingBox(terrainBlock, heightMapMesh);
+                }
             }
         }
+    }
+
+    private PNGData decodePng(String heightMapFile) throws IOException {
+        PNGDecoder decoder = new PNGDecoder(getClass().getResourceAsStream(heightMapFile));
+        ByteBuffer buf = ByteBuffer.allocateDirect(
+                4 * decoder.getWidth() * decoder.getHeight());
+        decoder.decode(buf, decoder.getWidth() * 4, PNGDecoder.Format.RGBA);
+        buf.flip();
+        int height = decoder.getHeight();
+        int width = decoder.getWidth();
+        return new PNGData(buf, height, width);
     }
 
     public float getHeight(Vector3f position) {
@@ -104,21 +134,21 @@ public class Terrain {
         Vector3f[] triangle = new Vector3f[3];
         triangle[1] = new Vector3f(
                 boundingBox.x + col * cellWidth,
-                getWorldHeight(row + 1, col, terrainBlock),
+                getWorldHeight(row + 1, col, terrainBlock, boundingBox),
                 boundingBox.y + (row + 1) * cellHeight);
         triangle[2] = new Vector3f(
                 boundingBox.x + (col + 1) * cellWidth,
-                getWorldHeight(row, col + 1, terrainBlock),
+                getWorldHeight(row, col + 1, terrainBlock, boundingBox),
                 boundingBox.y + row * cellHeight);
         if (position.z < getDiagonalZCoord(triangle[1].x, triangle[1].z, triangle[2].x, triangle[2].z, position.x)) {
             triangle[0] = new Vector3f(
                     boundingBox.x + col * cellWidth,
-                    getWorldHeight(row, col, terrainBlock),
+                    getWorldHeight(row, col, terrainBlock, boundingBox),
                     boundingBox.y + row * cellHeight);
         } else {
             triangle[0] = new Vector3f(
                     boundingBox.x + (col + 1) * cellWidth,
-                    getWorldHeight(row + 2, col + 1, terrainBlock),
+                    getWorldHeight(row + 2, col + 1, terrainBlock, boundingBox),
                     boundingBox.y + (row + 1) * cellHeight);
         }
 
@@ -130,8 +160,8 @@ public class Terrain {
         return z;
     }
 
-    protected float getWorldHeight(int row, int col, GameItem gameItem) {
-        float y = heightMapMesh.getHeight(row, col);
+    protected float getWorldHeight(int row, int col, GameItem gameItem, Box2D box2D) {
+        float y = box2D.heightMapMesh.getHeight(row, col);
         return y * gameItem.getScale() + gameItem.getPosition().y;
     }
 
@@ -152,7 +182,7 @@ public class Terrain {
      * @param terrainBlock A GameItem instance that defines the terrain block
      * @return The boundingg box of the terrain block
      */
-    private Box2D getBoundingBox(GameItem terrainBlock) {
+    private Box2D getBoundingBox(GameItem terrainBlock, HeightMapMesh heightMapMesh) {
         float scale = terrainBlock.getScale();
         Vector3f position = terrainBlock.getPosition();
 
@@ -160,7 +190,7 @@ public class Terrain {
         float topLeftZ = HeightMapMesh.STARTZ * scale + position.z;
         float width = Math.abs(HeightMapMesh.STARTX * 2) * scale;
         float height = Math.abs(HeightMapMesh.STARTZ * 2) * scale;
-        Box2D boundingBox = new Box2D(topLeftX, topLeftZ, width, height);
+        Box2D boundingBox = new Box2D(topLeftX, topLeftZ, width, height, heightMapMesh);
         return boundingBox;
     }
 
@@ -178,11 +208,14 @@ public class Terrain {
 
         public float height;
 
-        public Box2D(float x, float y, float width, float height) {
+        HeightMapMesh heightMapMesh;
+
+        public Box2D(float x, float y, float width, float height, HeightMapMesh heightMapMesh) {
             this.x = x;
             this.y = y;
             this.width = width;
             this.height = height;
+            this.heightMapMesh = heightMapMesh;
         }
 
         public boolean contains(float x2, float y2) {
@@ -190,6 +223,18 @@ public class Terrain {
                     && y2 >= y
                     && x2 < x + width
                     && y2 < y + height;
+        }
+    }
+
+    static class PNGData {
+        final ByteBuffer buf;
+        final int height;
+        final int width;
+
+        public PNGData(ByteBuffer buf, int height, int width) {
+            this.buf = buf;
+            this.height = height;
+            this.width = width;
         }
     }
 }
