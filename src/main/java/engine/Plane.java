@@ -67,7 +67,7 @@ public class Plane extends GameItem {
 			rotationOffset.z -= TILT_ANGLE_DIFFERENCE;
 		}
 
-//		rotationOffset.mul((float) Math.cos(Math.toRadians(speedDirectionAngle)));
+		rotationOffset.mul((float) Math.cos(Math.toRadians(speedDirectionAngle)));
 	}
 
 	private boolean increaseOffset(Window window) {
@@ -105,7 +105,7 @@ public class Plane extends GameItem {
 		final float height = terrain.getHeight(position) + 2;
 		position.y += GRAVITY * difference * Math.sin(Math.toRadians(speedDirectionAngle));
 		if (position.y <= height) {
-//			isInAir = false;
+			isInAir = false;
 			if (speedDirectionAngle > CRASH_LIMIT_ANGLE) {
 				speedDirectionAngle = NEGATIVE_RIGHT_ANGLE;
 				rotation.set(new Quaternionf());

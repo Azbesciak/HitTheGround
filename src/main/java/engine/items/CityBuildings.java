@@ -18,9 +18,8 @@ public class CityBuildings extends GameItem {
         Material material = new Material();
         cityBuildingsMesh.setMaterial(material);
         setMesh(cityBuildingsMesh);
-        setPosition(0, 0, 0);
-        scale = 1;
-        rotation.rotateX((float)Math.toRadians(90)).rotateY(90);
+        setPosition(0, -100, 0);
+        scale = 0.1f;
         getMesh().setBoundingRadius(1000);
     }
 
