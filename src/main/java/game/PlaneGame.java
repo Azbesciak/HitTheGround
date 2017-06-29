@@ -36,7 +36,7 @@ public class PlaneGame implements IGameLogic {
 	public void init(Window window) throws Exception {
 		renderer.init(window);
 		scene = new Scene();
-		float skyBoxScale = 75.0f;
+		float skyBoxScale = 200.0f;
 
 		scene.setTerrain(prepareTerrain());
 		scene.setPlane(createPlane());
@@ -54,7 +54,7 @@ public class PlaneGame implements IGameLogic {
 	}
 
 	private Terrain prepareTerrain() throws Exception {
-		float terrainScale = 75;
+		float terrainScale = 150;
 		int terrainSize = 5;
 		float minY = 0f;
 		float maxY = 0.25f;
@@ -66,7 +66,7 @@ public class PlaneGame implements IGameLogic {
 
 	private Fog createFog() {
 		Vector3f fogColour = new Vector3f(0.5f, 0.5f, 0.5f);
-		return new Fog(true, fogColour, 0.02f);
+		return new Fog(true, fogColour, 0.01f);
 	}
 
 	private SkyBox createSkyBox(float skyBoxScale) throws Exception {

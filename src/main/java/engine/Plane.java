@@ -2,6 +2,7 @@ package engine;
 
 import engine.items.GameItem;
 import engine.items.Terrain;
+import org.joml.Quaternionf;
 import org.joml.Vector3f;
 
 import static org.lwjgl.glfw.GLFW.*;
@@ -9,128 +10,75 @@ import static org.lwjgl.glfw.GLFW.GLFW_KEY_RIGHT;
 
 public class Plane extends GameItem {
 
-	private float speed;
-	private final float MAX_SPEED = 1;
+	private static final double MAX_SPEED = 15;
+	private static final double ACCELERATION = 0.01;
+	private static final double RESISTANCE = 0.0001;
+	private static final double GRAVITY = 0.01;
+	private static final int NEGATIVE_RIGHT_ANGLE = -90;
+	public static final int CRASH_LIMIT_ANGLE = -30;
+	public static final float TILT_ANGLE_DIFFERENCE = 0.05f;
+
+	private double speedDirectionAngle = NEGATIVE_RIGHT_ANGLE;
 	private Vector3f positionOffset;
 	private Vector3f rotationOffset;
-	public Vector3f positionDegrees;
 
-	public Vector3f rotationCorrection;
+	private boolean isInAir = false;
 
-	public int angle = 10;
+	private long recentTime;
+	private long difference;
+
 	public Plane(String objModel, String textureFile, String normalFile) throws Exception {
 		super(objModel, textureFile, normalFile);
 		positionOffset = new Vector3f();
 		rotationOffset = new Vector3f();
-		positionDegrees = new Vector3f();
-		rotationCorrection = new Vector3f((float) Math.toRadians(0), 0 ,0);
 		scale = 0.1f;
-		getRotation().rotateX((float)Math.toRadians(-90));
+		recentTime = System.currentTimeMillis();
+		stabilizePlaneModel();
 	}
 
 	public boolean onInput(Window window) {
-		boolean positionChanged = increaseOffset(window);
-		boolean rotationChanged = rotate(window);
-		return positionChanged || rotationChanged;
+		increaseOffset(window);
+		rotate(window);
+		return true;
 	}
 
-	private boolean rotate(Window window) {
-		boolean sceneChanged = false;
-		if (window.isKeyPressed(GLFW_KEY_LEFT)) {
-			sceneChanged = true;
-			rotationOffset.y -= 0.1f;
-//			rotationCorrection.x -= 0.05f;
-//			rotationCorrection.y += 0.05f;
-//			rotationCorrection.z += 0.05f;
-		} else if (window.isKeyPressed(GLFW_KEY_RIGHT)) {
-			sceneChanged = true;
-			rotationOffset.y += 0.1f;
-//			rotationCorrection.x += 0.05f;
-//			rotationCorrection.y -= 0.05f;
-//			rotationCorrection.z -= 0.05f;
+	private void rotate(Window window) {
+		if (isInAir) {
+			if (window.isKeyPressed(GLFW_KEY_LEFT)) {
+				rotationOffset.y -= TILT_ANGLE_DIFFERENCE;
+			} else if (window.isKeyPressed(GLFW_KEY_RIGHT)) {
+				rotationOffset.y += TILT_ANGLE_DIFFERENCE;
+			}
 		}
 		if (window.isKeyPressed(GLFW_KEY_UP)) {
-			sceneChanged = true;
-			rotationOffset.x += 0.05f;
-//			rotationCorrection.y += 0.05f;
-//			rotationCorrection.z += 0.05f;
+			rotationOffset.x += TILT_ANGLE_DIFFERENCE;
 		} else if (window.isKeyPressed(GLFW_KEY_DOWN)) {
-			sceneChanged = true;
-			rotationOffset.x -= 0.1f;
-//			rotationCorrection.y -= 0.05f;
-//			rotationCorrection.z -= 0.05f;
+			rotationOffset.x -= TILT_ANGLE_DIFFERENCE;
 		}
-		rotationCorrection.x = keepInBorder(rotationCorrection.x);
-		rotationCorrection.y = keepInBorder(rotationCorrection.y);
-		rotationCorrection.z = keepInBorder(rotationCorrection.z);
-
-		if (window.isKeyPressed(GLFW_KEY_1)) {
-			sceneChanged = true;
-			rotationCorrection.x += 0.01f;
-		} else if (window.isKeyPressed(GLFW_KEY_2)) {
-			sceneChanged = true;
-			rotationCorrection.x -= 0.01f;
-		}
-		if (window.isKeyPressed(GLFW_KEY_3)) {
-			sceneChanged = true;
-			rotationCorrection.y += 0.01f;
-		} else if (window.isKeyPressed(GLFW_KEY_4)) {
-			sceneChanged = true;
-			rotationCorrection.y -= 0.01f;
-		}
-		if (window.isKeyPressed(GLFW_KEY_5)) {
-			sceneChanged = true;
-			rotationCorrection.z += 0.01f;
-		} else if (window.isKeyPressed(GLFW_KEY_6)) {
-			sceneChanged = true;
-			rotationCorrection.z -= 0.01f;
-		}
-
-		return sceneChanged;
-	}
-
-	private float keepInBorder(float value) {
-		if (value > 1) {
-			return 1;
-		} else if (value < -1) {
-			return -1;
-		} else {
-			return value;
-		}
+		rotationOffset.mul((float)Math.cos(Math.toRadians(speedDirectionAngle)));
 	}
 
 	private boolean increaseOffset(Window window) {
-		boolean sceneChanged = false;
+		difference = System.currentTimeMillis() - recentTime;
 		if (window.isKeyPressed(GLFW_KEY_W)) {
-			sceneChanged = true;
-			positionOffset.z -= 1;
+			speedDirectionAngle = Math.min(speedDirectionAngle + difference * ACCELERATION, 0);
 		} else if (window.isKeyPressed(GLFW_KEY_S)) {
-			sceneChanged = true;
-			positionOffset.z += 1;
+			speedDirectionAngle = Math.max(speedDirectionAngle - difference * ACCELERATION, NEGATIVE_RIGHT_ANGLE);
 		}
+		speedDirectionAngle = Math.max(speedDirectionAngle - difference * RESISTANCE, NEGATIVE_RIGHT_ANGLE);
+		positionOffset.z -= Math.cos(Math.toRadians(speedDirectionAngle)) * MAX_SPEED;
 		if (window.isKeyPressed(GLFW_KEY_A)) {
-			sceneChanged = true;
 			positionOffset.x -= 1;
 		} else if (window.isKeyPressed(GLFW_KEY_D)) {
-			sceneChanged = true;
 			positionOffset.x += 1;
 		}
 		if (window.isKeyPressed(GLFW_KEY_Z)) {
-			sceneChanged = true;
 			positionOffset.y -= 1;
 		} else if (window.isKeyPressed(GLFW_KEY_X)) {
-			sceneChanged = true;
 			positionOffset.y += 1;
 		}
-
-		if (window.isKeyPressed(GLFW_KEY_Q)) {
-			sceneChanged = true;
-			angle -= 1;
-		} else if (window.isKeyPressed(GLFW_KEY_E)) {
-			sceneChanged = true;
-			angle += 1;
-		}
-		return sceneChanged;
+		recentTime = System.currentTimeMillis();
+		return true;
 	}
 
 	public void update(Terrain terrain, float sensitivity) {
@@ -142,8 +90,17 @@ public class Plane extends GameItem {
 		positionOffset.mul(sensitivity);
 		position.add(positionOffset.rotate(Utils.deepCopy(rotation).rotateX(90)));
 		final float height = terrain.getHeight(position) + 2;
-		if (position.y < height) {
+		position.y += GRAVITY * difference * Math.sin(Math.toRadians(speedDirectionAngle));
+		if (position.y <= height) {
+			isInAir = false;
+			if (speedDirectionAngle > CRASH_LIMIT_ANGLE) {
+				speedDirectionAngle = NEGATIVE_RIGHT_ANGLE;
+				rotation.set(new Quaternionf());
+				stabilizePlaneModel();
+			}
 			position.y = height;
+		} else {
+			isInAir = true;
 		}
 		positionOffset.zero();
 	}
@@ -155,6 +112,10 @@ public class Plane extends GameItem {
 				rotationOffset.z
 		);
 		rotationOffset.zero();
+	}
+
+	private void stabilizePlaneModel() {
+		rotation.rotateX((float) Math.toRadians(-90));
 	}
 
 }

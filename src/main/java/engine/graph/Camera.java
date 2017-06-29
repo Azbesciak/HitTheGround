@@ -8,6 +8,7 @@ import org.joml.Vector3f;
 
 public class Camera {
 
+    public static final int TILT_OF_CAMERA = 15;
     private final Vector3f position;
 
     private final Quaternionf rotation;
@@ -48,15 +49,14 @@ public class Camera {
 		final Quaternionf planeRotation = Utils.deepCopy(plane.getRotation()).rotateX((float)Math.toRadians(90));
 
 
-		rotation.set(planeRotation.conjugate().rotateXYZ(plane.rotationCorrection.x, plane.rotationCorrection.y, plane.rotationCorrection.z));
+		rotation.set(planeRotation.conjugate());
         final Vector3f cameraUponPlane = new Vector3f(
                 0,
-                (float) Math.sin(Math.toRadians(15)) * distance,
-                (float) Math.cos(Math.toRadians(15)) * distance);
+                (float) Math.sin(Math.toRadians(TILT_OF_CAMERA)) * distance,
+                (float) Math.cos(Math.toRadians(TILT_OF_CAMERA)) * distance);
 
         position.set(cameraUponPlane
-				.rotate(Utils.deepCopy(rotation).conjugate())
-							 .add(planePosition));
+				.rotate(planeRotation.conjugate()).add(planePosition));
 	}
 
     public Quaternionf getRotation() {
