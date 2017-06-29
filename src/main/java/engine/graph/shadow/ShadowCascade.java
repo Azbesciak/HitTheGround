@@ -1,6 +1,7 @@
 package engine.graph.shadow;
 
 import org.joml.Matrix4f;
+import org.joml.Quaternionf;
 import org.joml.Vector3f;
 import org.joml.Vector4f;
 import engine.Window;
@@ -89,6 +90,7 @@ public class ShadowCascade {
         float lightAngleX = (float) Math.toDegrees(Math.acos(lightDirection.z));
         float lightAngleY = (float) Math.toDegrees(Math.asin(lightDirection.x));
         float lightAngleZ = 0;
+        final Quaternionf light = new Quaternionf().rotate(lightAngleX, lightAngleY, lightAngleZ);
         Transformation.updateGenericViewMatrix(lightPosition, new Vector3f(lightAngleX, lightAngleY, lightAngleZ), lightViewMatrix);
     }
 

@@ -1,5 +1,8 @@
 package engine;
 
+import com.rits.cloning.Cloner;
+import org.joml.Quaternionf;
+import org.joml.Vector3f;
 import org.lwjgl.BufferUtils;
 
 import java.io.BufferedReader;
@@ -103,4 +106,24 @@ public class Utils {
         return newBuffer;
     }
 
+    public static Vector3f updatePosition(Vector3f rotation, Vector3f currentPosition, Vector3f positionOffset) {
+        return updatePosition(new Quaternionf(rotation.x, rotation.y, rotation.z), currentPosition, positionOffset);
+    }
+
+    public static Vector3f updatePosition(Quaternionf rotation, Vector3f currentPosition, Vector3f positionOffset) {
+        if (positionOffset.z != 0 ) {
+            currentPosition.x -= (float)Math.sin(Math.toRadians(rotation.y)) * positionOffset.z;
+            currentPosition.z += (float)Math.cos(Math.toRadians(rotation.y)) * positionOffset.z;
+        }
+        if (positionOffset.x != 0) {
+            currentPosition.x -= (float)Math.sin(Math.toRadians(rotation.y - 90)) * positionOffset.x;
+            currentPosition.z += (float)Math.cos(Math.toRadians(rotation.y - 90)) * positionOffset.x;
+        }
+        currentPosition.y += positionOffset.y;
+        return currentPosition;
+    }
+
+    public static <E> E deepCopy(E original) {
+        return new Cloner().deepClone(original);
+    }
 }

@@ -1,7 +1,10 @@
 package engine.graph;
 
 import engine.Plane;
+import engine.Utils;
+import org.joml.Matrix3f;
 import org.joml.Matrix4f;
+import org.joml.Quaternionf;
 import org.joml.Vector3f;
 
 public class Camera {
@@ -41,28 +44,21 @@ public class Camera {
         return Transformation.updateGenericViewMatrix(position, rotation, viewMatrix);
     }
 
-    public void followPlane(Plane plane, Vector3f distance) {
+    public void followPlane(Plane plane, float distance) {
         final Vector3f planePosition = plane.getPosition();
-        position.x = planePosition.x + distance.x;
-        position.y = planePosition.y + distance.y;
-        position.z = planePosition.z + distance.z;
-    }
 
-//    public void updatePosition(float offsetX, float offsetY, float offsetZ, Terrain terrain) {
-//        if ( offsetZ != 0 ) {
-//            position.x += (float)Math.sin(Math.toRadians(rotation.y)) * -1.0f * offsetZ;
-//            position.z += (float)Math.cos(Math.toRadians(rotation.y)) * offsetZ;
-//        }
-//        if ( offsetX != 0) {
-//            position.x += (float)Math.sin(Math.toRadians(rotation.y - 90)) * -1.0f * offsetX;
-//            position.z += (float)Math.cos(Math.toRadians(rotation.y - 90)) * offsetX;
-//        }
-//        position.y += offsetY;
-//        final float height = terrain.getHeight(position) + 2;
-//        if (position.y < height) {
-//            position.y = height;
-//        }
-//    }
+        final Vector3f planeRotation =
+                Utils.deepCopy(plane.getRotation())
+                        .rotateX(90)
+                        .getEulerAnglesXYZ(new Vector3f());
+        rotation.x = -(float)Math.toDegrees(planeRotation.x) + 20;
+        rotation.y = -(float)Math.toDegrees(planeRotation.y);
+        rotation.z = -(float)Math.toDegrees(planeRotation.z);
+
+        position.x = planePosition.x;// - (float)Math.sin(planeRotation.y) * 0.2f;
+        position.y = planePosition.y - (float)Math.sin(planeRotation.x) * 2;
+        position.z = planePosition.z + (float)Math.cos(planeRotation.x) * 2;
+    }
 
     public Vector3f getRotation() {
         return rotation;

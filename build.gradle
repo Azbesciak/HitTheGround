@@ -38,10 +38,10 @@ repositories {
 }
 
 dependencies {
+    compile 'uk.com.robust-it:cloning:1.9.3'
     compile "org.joml:joml:${jomlVersion}"
     compile group: 'org.l33tlabs.twl', name: 'pngdecoder', version: '1.0'
     compile "org.jetbrains.kotlin:kotlin-stdlib-jre8:$kotlin_version"
-    testCompile group: 'junit', name: 'junit', version: '4.12'
     compile "org.lwjgl:lwjgl:${lwjglVersion}"
     compile "org.lwjgl:lwjgl-assimp:${lwjglVersion}"
     compile "org.lwjgl:lwjgl-bgfx:${lwjglVersion}"

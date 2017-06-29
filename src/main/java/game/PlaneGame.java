@@ -128,7 +128,7 @@ public class PlaneGame implements IGameLogic {
 	}
 
 	private void moveCamera() {
-		camera.followPlane(scene.getPlane(), new Vector3f(0,0.5f,2f));
+		camera.followPlane(scene.getPlane(), 2);
 	}
 
 	private void updateLight() {
