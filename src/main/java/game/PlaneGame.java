@@ -1,9 +1,18 @@
 package game;
 
-import engine.*;
-import engine.graph.*;
+import engine.IGameLogic;
+import engine.MouseInput;
+import engine.Plane;
+import engine.Scene;
+import engine.SceneLight;
+import engine.Window;
+import engine.graph.Camera;
+import engine.graph.Renderer;
 import engine.graph.lights.DirectionalLight;
 import engine.graph.weather.Fog;
+import engine.items.City;
+import engine.items.CityBuildings;
+import engine.items.GameItem;
 import engine.items.SkyBox;
 import engine.items.Terrain;
 import org.joml.Vector2f;
@@ -38,6 +47,8 @@ public class PlaneGame implements IGameLogic {
 		scene = new Scene();
 
 		scene.setTerrain(prepareTerrain());
+		scene.addGameItems(prepareCity().getGameItems());
+        scene.addGameItems(prepareCityBuildings().getGameItems());
 		scene.setPlane(createPlane());
 		scene.setRenderShadows(true);
 		scene.setFog(createFog());
@@ -62,6 +73,31 @@ public class PlaneGame implements IGameLogic {
 						   "/textures/heightmap.png",
 						   "/textures/terrain.png", textInc);
 	}
+
+    private CityBuildings prepareCityBuildings() throws Exception {
+        CityBuildings cityBuildings= new CityBuildings("/models/city2/The_city.obj");
+        GameItem[] gm = cityBuildings.getGameItems();
+
+        for (GameItem gameItem : cityBuildings.getGameItems()) {
+            gameItem.setScale(75);
+            gameItem.setDisableFrustumCulling(true);
+            gameItem.setInsideFrustum(false);
+        }
+        return cityBuildings;
+    }
+
+	private City prepareCity() throws Exception {
+		float terrainScale = skyBoxScale * 0.8f;
+		int terrainSize = 5;
+		float minY = 0f;
+		float maxY = 0.25f;
+		int textInc = 40;
+		return new City(terrainSize, terrainScale, minY, maxY,
+				"/textures/heightmap_city.png",
+				"/textures/terrain_city.png", textInc);
+	}
+
+//	private Terrain
 
 	private Fog createFog() {
 		Vector3f fogColour = new Vector3f(0.5f, 0.5f, 0.5f);
@@ -104,6 +140,8 @@ public class PlaneGame implements IGameLogic {
 	@Override
 	public void update(float interval, MouseInput mouseInput, Window window) {
 		rotateCamera(mouseInput);
+//		Quaternionf rotation = scene.getPlane().getRotation();
+//		camera.setRotation(rotation.x,rotation.y,rotation.z);
 		// Update camera position
 		scene.getPlane().update(scene.getTerrain(), CAMERA_POS_STEP);
 		moveCamera(scene.getPlane().getCameraDistance());

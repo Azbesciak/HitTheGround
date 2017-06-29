@@ -156,6 +156,7 @@ public class Mesh {
 		glEnableVertexAttribArray(2);
 		glEnableVertexAttribArray(3);
 		glEnableVertexAttribArray(4);
+//		glEnableVertexAttribArray(5);
 	}
 
 	protected void endRender() {
@@ -165,6 +166,7 @@ public class Mesh {
 		glDisableVertexAttribArray(2);
 		glDisableVertexAttribArray(3);
 		glDisableVertexAttribArray(4);
+//		glDisableVertexAttribArray(5);
 		glBindVertexArray(0);
 
 		glBindTexture(GL_TEXTURE_2D, 0);
