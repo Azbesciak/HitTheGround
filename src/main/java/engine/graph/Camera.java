@@ -2,7 +2,6 @@ package engine.graph;
 
 import engine.Plane;
 import engine.Utils;
-import org.joml.Matrix3f;
 import org.joml.Matrix4f;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
@@ -10,18 +9,18 @@ import org.joml.Vector3f;
 public class Camera {
 
     private final Vector3f position;
-    
-    private final Vector3f rotation;
+
+    private final Quaternionf rotation;
     
     private Matrix4f viewMatrix;
     
     public Camera() {
-        position = new Vector3f(0, 0, 0);
-        rotation = new Vector3f(0, 0, 0);
+        position = new Vector3f();
+        rotation = new Quaternionf();
         viewMatrix = new Matrix4f();
     }
     
-    public Camera(Vector3f position, Vector3f rotation) {
+    public Camera(Vector3f position, Quaternionf rotation) {
         this.position = position;
         this.rotation = rotation;
     }
@@ -45,28 +44,22 @@ public class Camera {
     }
 
     public void followPlane(Plane plane, float distance) {
-        final Vector3f planePosition = plane.getPosition();
-
-        final Vector3f planeRotation =
-                Utils.deepCopy(plane.getRotation())
-                        .rotateX(90)
-                        .getEulerAnglesXYZ(new Vector3f());
-        rotation.x = -(float)Math.toDegrees(planeRotation.x) + 25;
-        rotation.y = -(float)Math.toDegrees(planeRotation.y);
-        rotation.z = -(float)Math.toDegrees(planeRotation.z) +50;
+        final Vector3f planePosition = Utils.deepCopy(plane.getPosition());
+		final Quaternionf planeRotation = Utils.deepCopy(plane.getRotation()).rotateX((float)Math.toRadians(90));
 
 
-        position.set(new Vector3f(0,
-                                  (float)Math.sin(Math.toRadians(30)) * distance,
-                                  (float)Math.cos(Math.toRadians(30)) * distance)
-                .rotate(Utils.deepCopy(plane.getRotation())
-                                .rotateX(90)).add(planePosition));
-//        position.x = planePosition.x;// - (float)Math.sin(planeRotation.y) * 0.2f;
-//        position.y = planePosition.y - (float)(Math.sin(Math.toRadians(rotation.x)) * 2);
-//        position.z = planePosition.z + (float)(Math.cos(Math.toRadians(rotation.x)) * 2);
-    }
+		rotation.set(planeRotation.conjugate().rotateXYZ(plane.rotationCorrection.x, plane.rotationCorrection.y, plane.rotationCorrection.z));
+        final Vector3f cameraUponPlane = new Vector3f(
+                0,
+                (float) Math.sin(Math.toRadians(15)) * distance,
+                (float) Math.cos(Math.toRadians(15)) * distance);
 
-    public Vector3f getRotation() {
+        position.set(cameraUponPlane
+				.rotate(Utils.deepCopy(rotation).conjugate())
+							 .add(planePosition));
+	}
+
+    public Quaternionf getRotation() {
         return rotation;
     }
     

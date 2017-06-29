@@ -1,5 +1,6 @@
 package engine.graph;
 
+import engine.Utils;
 import org.joml.Matrix4f;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
@@ -28,16 +29,23 @@ public class Transformation {
         lightViewMatrix = new Matrix4f();
     }
 
-    public Matrix4f getLightViewMatrix() {
-        return lightViewMatrix;
-    }
+//    public Matrix4f getLightViewMatrix() {
+//        return lightViewMatrix;
+//    }
+//
+//    public void setLightViewMatrix(Matrix4f lightViewMatrix) {
+//        this.lightViewMatrix.set(lightViewMatrix);
+//    }
+//
+//    public Matrix4f updateLightViewMatrix(Vector3f position, Vector3f rotation) {
+//        return updateGenericViewMatrix(position, rotation, lightViewMatrix);
+//    }
 
-    public void setLightViewMatrix(Matrix4f lightViewMatrix) {
-        this.lightViewMatrix.set(lightViewMatrix);
-    }
-
-    public Matrix4f updateLightViewMatrix(Vector3f position, Vector3f rotation) {
-        return updateGenericViewMatrix(position, rotation, lightViewMatrix);
+    public static  Matrix4f updateGenericViewMatrix(Vector3f position, Quaternionf rotation, Matrix4f matrix) {
+        // First do the rotation so camera rotates over its position
+        return matrix
+                .rotation(rotation)
+                .translate(Utils.deepCopy(position).negate());
     }
 
     public static  Matrix4f updateGenericViewMatrix(Vector3f position, Vector3f rotation, Matrix4f matrix) {
@@ -47,9 +55,9 @@ public class Transformation {
                      .translate(-position.x, -position.y, -position.z);
     }
 
-    public final Matrix4f getOrtho2DProjectionMatrix(float left, float right, float bottom, float top) {
-        return ortho2DMatrix.setOrtho2D(left, right, bottom, top);
-    }
+//    public final Matrix4f getOrtho2DProjectionMatrix(float left, float right, float bottom, float top) {
+//        return ortho2DMatrix.setOrtho2D(left, right, bottom, top);
+//    }
     
     public Matrix4f buildModelMatrix(GameItem gameItem) {
         Quaternionf rotation = gameItem.getRotation();
@@ -67,15 +75,15 @@ public class Transformation {
         return viewMatrix.mulAffine(modelMatrix, modelViewMatrix);
     }
 
-    public Matrix4f buildModelLightViewMatrix(GameItem gameItem, Matrix4f lightViewMatrix) {
-        return buildModelViewMatrix(buildModelMatrix(gameItem), lightViewMatrix);
-    }
-
-    public Matrix4f buildModelLightViewMatrix(Matrix4f modelMatrix, Matrix4f lightViewMatrix) {
-        return lightViewMatrix.mulAffine(modelMatrix, modelLightViewMatrix);
-    }
-
-    public Matrix4f buildOrthoProjModelMatrix(GameItem gameItem, Matrix4f orthoMatrix) {
-        return orthoMatrix.mulOrthoAffine(buildModelMatrix(gameItem), orthoModelMatrix);
-    }
+//    public Matrix4f buildModelLightViewMatrix(GameItem gameItem, Matrix4f lightViewMatrix) {
+//        return buildModelViewMatrix(buildModelMatrix(gameItem), lightViewMatrix);
+//    }
+//
+//    public Matrix4f buildModelLightViewMatrix(Matrix4f modelMatrix, Matrix4f lightViewMatrix) {
+//        return lightViewMatrix.mulAffine(modelMatrix, modelLightViewMatrix);
+//    }
+//
+//    public Matrix4f buildOrthoProjModelMatrix(GameItem gameItem, Matrix4f orthoMatrix) {
+//        return orthoMatrix.mulOrthoAffine(buildModelMatrix(gameItem), orthoModelMatrix);
+//    }
 }
