@@ -2,10 +2,13 @@ package engine.items;
 
 import engine.graph.Material;
 import engine.graph.Texture;
+import engine.loaders.assimp.StaticMeshesLoader;
 import engine.loaders.obj.OBJLoader;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
 import engine.graph.Mesh;
+
+import java.io.File;
 
 public class GameItem {
 
@@ -26,7 +29,7 @@ public class GameItem {
     private boolean insideFrustum;
 
     public GameItem(String objModel, String textureFile) throws Exception {
-       this(objModel, textureFile, null);
+        this(objModel, textureFile, null);
     }
 
     public GameItem(String objModel, String textureFile, String normalFile) throws Exception {
@@ -41,6 +44,15 @@ public class GameItem {
         mesh.setMaterial(material);
         setMesh(mesh);
         setPosition(0, 0, 0);
+    }
+
+    public GameItem(String objModel, String textureDir, boolean assimp) throws Exception {
+        this();
+        String fileName = Thread.currentThread().getContextClassLoader()
+                .getResource(objModel).getFile();
+        File file = new File(fileName);
+        Mesh[] meshes = StaticMeshesLoader.load(file.getAbsolutePath(), textureDir);
+        setMeshes(meshes);
     }
 
     public GameItem() {

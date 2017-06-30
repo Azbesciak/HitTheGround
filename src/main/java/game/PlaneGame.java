@@ -7,6 +7,7 @@ import engine.Scene;
 import engine.SceneLight;
 import engine.Window;
 import engine.graph.Camera;
+import engine.graph.Mesh;
 import engine.graph.Renderer;
 import engine.graph.lights.DirectionalLight;
 import engine.graph.weather.Fog;
@@ -15,9 +16,12 @@ import engine.items.City;
 import engine.items.CityBuildings;
 import engine.items.SkyBox;
 import engine.items.Terrain;
+import engine.loaders.assimp.StaticMeshesLoader;
 import org.joml.Quaternionf;
 import org.joml.Vector2f;
 import org.joml.Vector3f;
+
+import java.io.File;
 
 public class PlaneGame implements IGameLogic {
 
@@ -48,12 +52,12 @@ public class PlaneGame implements IGameLogic {
         scene = new Scene();
 
         scene.setTerrain(prepareTerrain());
-//		scene.addGameItems(prepareCity().getGameItems());
-//        scene.addGameItems(prepareCityBuildings().getGameItems());
+		scene.addGameItems(prepareCity().getGameItems());
+        scene.addGameItems(prepareCityBuildings().getGameItems());
         for (Building building : prepareBuildings()) {
             scene.addGameItems(building.getGameItems());
         }
-//		scene.addGameItems(prepareBuilding().getGameItems());
+
         scene.setPlane(createPlane());
         scene.setRenderShadows(true);
         scene.setFog(createFog());
@@ -63,23 +67,18 @@ public class PlaneGame implements IGameLogic {
     }
 
     private Plane createPlane() throws Exception {
-        return new Plane("/models/FA-22_Raptor.obj",
-                "/textures/FA-22_Raptor_P01.png",
-                "/textures/FA-22_Raptor_N.png");
+        return new Plane("models/plane/FA-22_Raptor.obj", "/models/plane");
     }
 
     private Building[] prepareBuildings() throws Exception {
 
         return new Building[]{
-                new Building("/models/ob/building/building002.obj",
-                        "/models/ob/building/building002.mtl",
+                new Building("models/ob/building/building002.obj",
                         0, -100, -30, 4f, new Quaternionf(0.707f, 0, 0)),
-                new Building("/models/ob/skycraper/skycraper001.obj",
-                        "/models/ob/skycraper/skycraper001.mtl",
+                new Building("models/ob/skycraper/skycraper001.obj",
                         30, -115, 40, 0.004f, new Quaternionf(0, 0, 0)),
-                new Building("/models/ob/block/block001.obj",
-                        "/models/ob/block/block001.mtl",
-                        -33,-120,15,18f,new Quaternionf(0, 0,0))
+                new Building("models/ob/block/block001.obj",
+                        -33,-120,15,18f, new Quaternionf(0, 0,0))
         };
     }
 
@@ -97,7 +96,7 @@ public class PlaneGame implements IGameLogic {
     }
 
     private CityBuildings prepareCityBuildings() throws Exception {
-        CityBuildings cityBuildings = new CityBuildings("/models/city2/The_city.obj");
+        CityBuildings cityBuildings = new CityBuildings("models/city2/The_city.obj", "/models/city2");
         return cityBuildings;
     }
 
@@ -111,8 +110,6 @@ public class PlaneGame implements IGameLogic {
                 "/textures/heightmap_city.png",
                 "/textures/terrain_city.png", textInc);
     }
-
-//	private Terrain
 
     private Fog createFog() {
         Vector3f fogColour = new Vector3f(0.5f, 0.5f, 0.5f);

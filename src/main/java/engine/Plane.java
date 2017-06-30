@@ -1,5 +1,6 @@
 package engine;
 
+import engine.graph.Mesh;
 import engine.items.GameItem;
 import engine.items.Terrain;
 import org.joml.Quaternionf;
@@ -27,13 +28,16 @@ public class Plane extends GameItem {
 	private Vector3f rotationOffset;
 
 	private boolean isInAir = true;
-	private boolean wasCrash = false;
 
 	private long recentTime;
 	private long difference;
 
-	public Plane(String objModel, String textureFile, String normalFile) throws Exception {
-		super(objModel, textureFile, normalFile);
+	public Plane(String objModel, String textureFile) throws Exception {
+		super(objModel, textureFile, true);
+		initialize();
+	}
+
+	private void initialize() {
 		positionOffset = new Vector3f();
 		rotationOffset = new Vector3f();
 		scale = WORLD_SCALE;

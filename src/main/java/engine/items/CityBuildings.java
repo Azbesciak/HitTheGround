@@ -1,9 +1,5 @@
 package engine.items;
 
-import engine.graph.Material;
-import engine.graph.Mesh;
-import engine.loaders.obj.OBJLoader;
-
 public class CityBuildings extends GameItem {
 
 
@@ -11,15 +7,12 @@ public class CityBuildings extends GameItem {
         return new GameItem[]{this};
     }
 
-    public CityBuildings(String objFile) throws Exception {
-        super();
-        Mesh cityBuildingsMesh = OBJLoader.loadMesh(objFile);
-        Material material = new Material();
-        cityBuildingsMesh.setMaterial(material);
-        setMesh(cityBuildingsMesh);
+    public CityBuildings(String objFile, String textureDir) throws Exception {
+        super(objFile, textureDir, true);
         setPosition(0, -100, 0);
         scale = 0.1f;
         getMesh().setBoundingRadius(1000);
+        setDisableFrustumCulling(true);
     }
 
 }

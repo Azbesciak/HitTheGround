@@ -19,18 +19,8 @@ public class Building extends GameItem {
         return new GameItem[]{this};
     }
 
-    public Building(String objFile, String mtlFile, int posX, int posY, int posZ, float scaling, Quaternionf rotation) throws Exception {
-        super();
-        HashMap<String, Material> materials = MaterialLoader.loadMaterials(mtlFile);
-//        Mesh cityBuildingsMesh = OBJLoader.loadMesh(objFile);
-        Mesh[] meshes = new Mesh[materials.size()];
-        int i = 0;
-        for (Map.Entry<String, Material> entry : materials.entrySet()) {
-            meshes[i++] = OBJLoader.loadMesh(objFile, entry.getKey(), entry.getValue());
-        }
-
-//        setMesh(cityBuildingsMesh);
-        setMeshes(meshes);
+    public Building(String objFile, int posX, int posY, int posZ, float scaling, Quaternionf rotation) throws Exception {
+        super(objFile, null, true);
         for (Mesh mesh : getMeshes()) {
             mesh.setBoundingRadius(1000);
         }
