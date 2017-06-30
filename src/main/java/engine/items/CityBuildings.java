@@ -2,7 +2,6 @@ package engine.items;
 
 import engine.graph.Material;
 import engine.graph.Mesh;
-import engine.loaders.assimp.StaticMeshesLoader;
 import engine.loaders.obj.OBJLoader;
 
 public class CityBuildings extends GameItem {

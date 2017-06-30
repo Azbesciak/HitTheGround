@@ -48,6 +48,7 @@ public class Plane extends GameItem {
 	}
 
 	private void rotate(Window window) {
+//		if(true){
 		if (isInAir) {
 			if (window.isKeyPressed(GLFW_KEY_LEFT)) {
 				rotationOffset.y -= TILT_ANGLE_DIFFERENCE;
@@ -62,32 +63,37 @@ public class Plane extends GameItem {
 		}
 
 		if (window.isKeyPressed(GLFW_KEY_Q)) {
-			rotationOffset.z += TILT_ANGLE_DIFFERENCE;
+//			rotationOffset.z += TILT_ANGLE_DIFFERENCE;
+            rotationOffset.z += 0.05;
 		} else if (window.isKeyPressed(GLFW_KEY_E)) {
-			rotationOffset.z -= TILT_ANGLE_DIFFERENCE;
+//			rotationOffset.z -= TILT_ANGLE_DIFFERENCE;
+            rotationOffset.z -= 0.05;
 		}
 
-		rotationOffset.mul((float) Math.cos(Math.toRadians(speedDirectionAngle)));
+//		rotationOffset.mul((float) Math.cos(Math.toRadians(speedDirectionAngle)));
 	}
 
 	private boolean increaseOffset(Window window) {
 		difference = System.currentTimeMillis() - recentTime;
 		if (window.isKeyPressed(GLFW_KEY_W)) {
-			speedDirectionAngle = Math.min(speedDirectionAngle + difference * ACCELERATION, 0);
+//			speedDirectionAngle = Math.min(speedDirectionAngle + difference * ACCELERATION, 0);
+			speedDirectionAngle += 0.5f;
 		} else if (window.isKeyPressed(GLFW_KEY_S)) {
-			speedDirectionAngle = Math.max(speedDirectionAngle - difference * ACCELERATION, NEGATIVE_RIGHT_ANGLE);
+//			speedDirectionAngle = Math.max(speedDirectionAngle - difference * ACCELERATION, NEGATIVE_RIGHT_ANGLE);
+			speedDirectionAngle -= 0.5f;
 		}
 		speedDirectionAngle = Math.max(speedDirectionAngle - difference * RESISTANCE, NEGATIVE_RIGHT_ANGLE);
 		positionOffset.z -= Math.cos(Math.toRadians(speedDirectionAngle)) * MAX_SPEED;
+//        positionOffset.z -= speedDirectionAngle;
 		if (window.isKeyPressed(GLFW_KEY_A)) {
-			positionOffset.x -= 1;
+			positionOffset.x -= 5;
 		} else if (window.isKeyPressed(GLFW_KEY_D)) {
-			positionOffset.x += 1;
+			positionOffset.x += 5;
 		}
 		if (window.isKeyPressed(GLFW_KEY_Z)) {
-			positionOffset.y -= 1;
+			positionOffset.y -= 5;
 		} else if (window.isKeyPressed(GLFW_KEY_X)) {
-			positionOffset.y += 1;
+			positionOffset.y += 5;
 		}
 		recentTime = System.currentTimeMillis();
 		return true;
@@ -103,7 +109,8 @@ public class Plane extends GameItem {
 		final Quaternionf planeRealRotation = Utils.deepCopy(rotation).rotateX(90);
 		position.add(positionOffset.rotate(planeRealRotation));
 		final float height = terrain.getHeight(position) + 2;
-		position.y += GRAVITY * difference * Math.sin(Math.toRadians(speedDirectionAngle));
+//		position.y += GRAVITY * difference * Math.sin(Math.toRadians(speedDirectionAngle));
+		position.y += positionOffset.y;
 		if (position.y <= height) {
 			isInAir = false;
 			if (speedDirectionAngle > CRASH_LIMIT_ANGLE) {

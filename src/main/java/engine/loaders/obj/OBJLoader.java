@@ -1,10 +1,11 @@
 package engine.loaders.obj;
 
-import org.joml.Vector2f;
-import org.joml.Vector3f;
 import engine.Utils;
 import engine.graph.InstancedMesh;
+import engine.graph.Material;
 import engine.graph.Mesh;
+import org.joml.Vector2f;
+import org.joml.Vector3f;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -13,6 +14,61 @@ public class OBJLoader {
 
     public static Mesh loadMesh(String fileName) throws Exception {
         return loadMesh(fileName, 1);
+    }
+
+    public static Mesh loadMesh(String fileName, String materialName, Material material) throws Exception {
+        List<String> lines = Utils.readAllLines(fileName);
+
+        List<Vector3f> vertices = new ArrayList<>();
+        List<Vector2f> textures = new ArrayList<>();
+        List<Vector3f> normals = new ArrayList<>();
+        List<Face> faces = new ArrayList<>();
+
+        String curMat = "";
+
+        for (String line : lines) {
+            String[] tokens = line.split("\\s+");
+            switch (tokens[0]) {
+                case "v":
+                    // Geometric vertex
+                    Vector3f vec3f = new Vector3f(
+                            Float.parseFloat(tokens[1]),
+                            Float.parseFloat(tokens[2]),
+                            Float.parseFloat(tokens[3]));
+                    vertices.add(vec3f);
+                    break;
+                case "vt":
+                    // Texture coordinate
+                    Vector2f vec2f = new Vector2f(
+                            Float.parseFloat(tokens[1]),
+                            Float.parseFloat(tokens[2]));
+                    textures.add(vec2f);
+                    break;
+                case "vn":
+                    // Vertex normal
+                    Vector3f vec3fNorm = new Vector3f(
+                            Float.parseFloat(tokens[1]),
+                            Float.parseFloat(tokens[2]),
+                            Float.parseFloat(tokens[3]));
+                    normals.add(vec3fNorm);
+                    break;
+                case "f":
+                    if (curMat.equals(materialName)) {
+                        Face face = new Face(tokens[1], tokens[2], tokens[3]);
+                        faces.add(face);
+                    }
+                    break;
+                case "usemtl":
+                    curMat = tokens[1];
+                    break;
+                default:
+                    // Ignore other lines
+                    break;
+            }
+        }
+        Mesh mesh = reorderLists(vertices, textures, normals, faces, 1);
+        mesh.setMaterial(material);
+        return mesh;
     }
 
     public static Mesh loadMesh(String fileName, int instances) throws Exception {
@@ -62,7 +118,7 @@ public class OBJLoader {
     }
 
     private static Mesh reorderLists(List<Vector3f> posList, List<Vector2f> textCoordList,
-            List<Vector3f> normList, List<Face> facesList, int instances) {
+                                     List<Vector3f> normList, List<Face> facesList, int instances) {
 
         List<Integer> indices = new ArrayList<>();
         // Create position array in the order it has been declared
@@ -95,8 +151,8 @@ public class OBJLoader {
     }
 
     private static void processFaceVertex(IdxGroup indices, List<Vector2f> textCoordList,
-            List<Vector3f> normList, List<Integer> indicesList,
-            float[] texCoordArr, float[] normArr) {
+                                          List<Vector3f> normList, List<Integer> indicesList,
+                                          float[] texCoordArr, float[] normArr) {
 
         // Set index for vertex coordinates
         int posIndex = indices.idxPos;
