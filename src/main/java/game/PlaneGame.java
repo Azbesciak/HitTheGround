@@ -1,13 +1,7 @@
 package game;
 
-import engine.IGameLogic;
-import engine.MouseInput;
-import engine.Plane;
-import engine.Scene;
-import engine.SceneLight;
-import engine.Window;
+import engine.*;
 import engine.graph.Camera;
-import engine.graph.Mesh;
 import engine.graph.Renderer;
 import engine.graph.lights.DirectionalLight;
 import engine.graph.weather.Fog;
@@ -16,18 +10,22 @@ import engine.items.City;
 import engine.items.CityBuildings;
 import engine.items.SkyBox;
 import engine.items.Terrain;
-import engine.loaders.assimp.StaticMeshesLoader;
 import org.joml.Quaternionf;
 import org.joml.Vector2f;
 import org.joml.Vector3f;
 
-import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
 
 public class PlaneGame implements IGameLogic {
 
     private static final float MOUSE_SENSITIVITY = 0.2f;
     private static final float CAMERA_POS_STEP = 0.10f;
     private static final int STRAIGHT_ANGLE = 180;
+    private static final int BUILDING_SPACES = 60;
+    public static final int NUMBER_OF_AVAILABLE_BUILDINGS = 4;
+    public static final int NUMBER_OF_EXISTING_BUILDINGS = 5;
 
     private final Renderer renderer;
     private final Camera camera;
@@ -51,10 +49,10 @@ public class PlaneGame implements IGameLogic {
         renderer.init(window);
         scene = new Scene();
 
-        scene.setTerrain(prepareTerrain());
-		scene.addGameItems(prepareCity().getGameItems());
-        scene.addGameItems(prepareCityBuildings().getGameItems());
-        for (Building building : prepareBuildings()) {
+        final Terrain terrain = prepareTerrain();
+        scene.setTerrain(terrain);
+//        scene.addGameItems(prepareCityBuildings(terrain).getGameItems());
+        for (Building building : prepareBuildings(terrain, NUMBER_OF_EXISTING_BUILDINGS)) {
             scene.addGameItems(building.getGameItems());
         }
 
@@ -70,15 +68,34 @@ public class PlaneGame implements IGameLogic {
         return new Plane("models/plane/FA-22_Raptor.obj", "/models/plane");
     }
 
-    private Building[] prepareBuildings() throws Exception {
+    private List<Building> prepareBuildings(Terrain terrain, int numberOfBuildings) throws Exception {
+        final Random random = new Random();
+        List<Building> buildings = new ArrayList<>(numberOfBuildings);
+        final Building[] availableBuildings = getAvailableBuildings();
+        float axis = numberOfBuildings * BUILDING_SPACES;
+        for (float x = -axis / 2; x <= axis / 2; x += BUILDING_SPACES) {
+            for (float z = -axis / 2; z  <= axis / 2; z += BUILDING_SPACES) {
+                final int buildingIndex = random.nextInt(NUMBER_OF_AVAILABLE_BUILDINGS);
+                final Building building = Utils.deepCopy(availableBuildings[buildingIndex]);
+                building.setPosition(x, z, terrain);
+                buildings.add(building);
+                building.setDisableFrustumCulling(false);
+            }
+        }
+        return buildings;
+    }
 
-        return new Building[]{
-                new Building("models/ob/building/building002.obj",
-                        0, -100, -30, 4f, new Quaternionf(0.707f, 0, 0)),
-                new Building("models/ob/skycraper/skycraper001.obj",
-                        30, -115, 40, 0.004f, new Quaternionf(0, 0, 0)),
-                new Building("models/ob/block/block001.obj",
-                        -33,-120,15,18f, new Quaternionf(0, 0,0))
+    private Building[] getAvailableBuildings() throws Exception {
+         return new Building[]{
+                new Building("models/ob/building/building002.obj", null,
+                             4f, new Quaternionf(0.707f, 0, 0)),
+                new Building("models/ob/skycraper/skycraper001.obj",null,
+                             0.004f, new Quaternionf(0, 0, 0)),
+                new Building("models/ob/block/block001.obj", null,
+                             18f, new Quaternionf(0, 0,0)),
+                 new Building("models/buildings/obj/ResidentialBuildings001.obj",
+                              "/models/buildings/textures",
+                              1, new Quaternionf(0, 0,0))
         };
     }
 
@@ -95,9 +112,8 @@ public class PlaneGame implements IGameLogic {
                 "/textures/heightmap_city.png");
     }
 
-    private CityBuildings prepareCityBuildings() throws Exception {
-        CityBuildings cityBuildings = new CityBuildings("models/city2/The_city.obj", "/models/city2");
-        return cityBuildings;
+    private CityBuildings prepareCityBuildings(Terrain terrain) throws Exception {
+       return new CityBuildings("models/city2/The_city.obj", "/models/city2", terrain);
     }
 
     private City prepareCity() throws Exception {

@@ -5,6 +5,7 @@ import engine.graph.Mesh;
 import engine.loaders.obj.MaterialLoader;
 import engine.loaders.obj.OBJLoader;
 import org.joml.Quaternionf;
+import org.joml.Vector3f;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -19,16 +20,20 @@ public class Building extends GameItem {
         return new GameItem[]{this};
     }
 
-    public Building(String objFile, int posX, int posY, int posZ, float scaling, Quaternionf rotation) throws Exception {
-        super(objFile, null, true);
+    public Building(String objFile, String textureDir, float scaling, Quaternionf rotation)
+            throws Exception {
+        super(objFile, textureDir, true);
         for (Mesh mesh : getMeshes()) {
-            mesh.setBoundingRadius(1000);
+            mesh.setBoundingRadius(20);
         }
-
-        setPosition(posX, posY, posZ);
         scale = scaling;
         setRotation(rotation);
-//        getMesh().setBoundingRadius(1000);
+
+    }
+
+    public void setPosition(float posX, float posZ, Terrain terrain) {
+        final float posY = terrain.getHeight(new Vector3f(posX, 0, posZ));
+        setPosition(posX, posY, posZ);
     }
 
 }
